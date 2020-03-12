@@ -2,6 +2,7 @@ package Vertx;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
@@ -30,6 +31,7 @@ public class Verticle extends AbstractVerticle {
 
     public void start() {
         try {
+            //
             File file = new File("");
             Object Object = new JSONParser().parse(new FileReader(file.getAbsolutePath() + "\\Config.json"));
             JSONObject jsonObject = (JSONObject) Object;
@@ -55,6 +57,12 @@ public class Verticle extends AbstractVerticle {
             int port =Integer.parseInt(httpServer.get("port").toString());
             server.requestHandler(router).listen(port);
             logger.log(Level.toLevel("INFO"),"localhost:"+port);
+
+            //Event Bus
+            EventBus eb = vertx.eventBus();
+            eb.consumer("localhost:"+port, message -> {
+                logger.log(Level.toLevel("INFO"), message.body());
+            });
         } catch (ParseException e) {
             logger.log(Level.toLevel("ERROR"),e.getMessage());
             e.printStackTrace();
